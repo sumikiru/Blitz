@@ -7,6 +7,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
+#include "Blitz/Player/BlitzPlayerState.h"
 
 ABlitzPlayerCharacter::ABlitzPlayerCharacter()
 {
@@ -44,6 +46,36 @@ void ABlitzPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput);
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
 	}
+}
+
+void ABlitzPlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// 注意要先设置好ASC和AS。对于Enemy直接在Begin中初始化ASC即可
+	InitBlitzAbilityActorInfo();
+
+	// todo: Grant Pawn Data
+}
+
+void ABlitzPlayerCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	InitBlitzAbilityActorInfo();
+}
+
+void ABlitzPlayerCharacter::InitBlitzAbilityActorInfo()
+{
+	ABlitzPlayerState* HeroPS = GetPlayerState<ABlitzPlayerState>();
+	checkf(HeroPS, TEXT("Player State is not found!"));
+
+	// 为Pawn中的ASC和AC赋值
+	BlitzAbilitySystemComponent = HeroPS->GetBlitzAbilitySystemComponent();
+	BlitzAttributeSet = HeroPS->GetBlitzAttributeSet();
+
+	// 初始化ASC的OwnerActor和AvatarActor
+	BlitzAbilitySystemComponent->InitAbilityActorInfo(HeroPS, this);
 }
 
 void ABlitzPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValue)

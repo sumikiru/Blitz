@@ -24,6 +24,15 @@ public:
 	ABlitzPlayerCharacter();
 	// 多人游戏中客户端玩家角色在此时初始化，可以绑定输入InputMappingContext（BeginPlay()中不是最佳方案）
 	virtual void PawnClientRestart() override;
+
+protected:
+	// 服务端初始化ASC
+	virtual void PossessedBy(AController* NewController) override;
+	// 客户端初始化ASC
+	virtual void OnRep_PlayerState() override;
+
+	// 初始化Player的时候，从PlayerState中获取ASC和AS，用以初始化Player的ASC和AS
+	virtual void InitBlitzAbilityActorInfo();
 	// 在这里绑定InputAction对应的UFUNCTION（IMC中是绑定对应的按键）
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 

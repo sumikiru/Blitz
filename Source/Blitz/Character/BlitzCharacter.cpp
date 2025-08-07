@@ -3,15 +3,22 @@
 
 #include "BlitzCharacter.h"
 
+#include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
+
 ABlitzCharacter::ABlitzCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void ABlitzCharacter::BeginPlay()
+UAbilitySystemComponent* ABlitzCharacter::GetAbilitySystemComponent() const
 {
-	Super::BeginPlay();
-	
+	return GetBlitzAbilitySystemComponent();
+}
+
+void ABlitzCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
 }
 

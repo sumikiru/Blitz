@@ -22,3 +22,7 @@ void UBlitzHeroComponent::AddAdditionalInputConfig(const UBlitzInputConfig* Inpu
 {
 	
 }
+
+void UBlitzHeroComponent::RemoveAdditionalInputConfig(const UBlitzInputConfig* InputConfig)
+{
+}
