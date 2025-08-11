@@ -17,6 +17,7 @@ public class Blitz : ModuleRules
 			"GameplayAbilities", 
 			"GameplayTasks", 
 			"GameplayTags", 
+			"NetCore",
 			"GameFeatures" 
 		});
 

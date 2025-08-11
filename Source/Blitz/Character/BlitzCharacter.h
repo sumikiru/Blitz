@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "DataAssets/BlitzPawnData.h"
 #include "BlitzCharacter.generated.h"
 
+class UBlitzPawnData;
 class UBlitzAttributeSet;
 class UBlitzAbilitySystemComponent;
 class UInputComponent;
@@ -24,10 +26,15 @@ class BLITZ_API ABlitzCharacter : public ACharacter, public IAbilitySystemInterf
 public:
 	ABlitzCharacter();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	// 拥有ASC的类，需要继承IAbilitySystemInterface并重写GetAbilitySystemComponent()方法
 	//~ Begin IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	//~ End IAbilitySystemInterface
+
+	// 由于启用了Push Model，必须手动标记脏数据并更新。只应该在Server端执行
+	void SetPawnData(const UBlitzPawnData* InPawnData);
 
 protected:
 	/**
@@ -48,8 +55,21 @@ protected:
 	TObjectPtr<UBlitzAbilitySystemComponent> BlitzAbilitySystemComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
 	TObjectPtr<UBlitzAttributeSet> BlitzAttributeSet;
+
+	UFUNCTION()
+	void OnRep_PawnData();
+
+	// 必须使用SetPawnData()手动标记脏数据并更新。游戏启动时需要立即为Character配置PawnData
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_PawnData, Category = "PawnData")
+	TSoftObjectPtr<const UBlitzPawnData> DefaultPawnData;
+
+	// 只能在服务端调用，且需要在InitBlitzAbilityActorInfo()之后调用（ASC实例化完成）
+	void GrantPawnData() const;
 	
 public:
 	FORCEINLINE UBlitzAbilitySystemComponent* GetBlitzAbilitySystemComponent() const { return BlitzAbilitySystemComponent; }
 	FORCEINLINE UBlitzAttributeSet* GetBlitzAttributeSet() const { return BlitzAttributeSet; }
+
+	template <class T>
+	const T* GetPawnData() const { return Cast<T>(DefaultPawnData); }
 };

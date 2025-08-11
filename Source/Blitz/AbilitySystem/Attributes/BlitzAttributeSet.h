@@ -47,7 +47,7 @@ class BLITZ_API UBlitzAttributeSet : public UAttributeSet
 
 public:
 	UBlitzAttributeSet();
-	UWorld* GetWorld() const override;
+	virtual UWorld* GetWorld() const override;
 	UBlitzAbilitySystemComponent* GetBlitzAbilitySystemComponent() const;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

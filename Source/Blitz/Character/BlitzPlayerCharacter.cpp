@@ -35,6 +35,19 @@ void ABlitzPlayerCharacter::PawnClientRestart()
 	}
 }
 
+void ABlitzPlayerCharacter::ServerInit()
+{
+	// 注意要先设置好ASC和AS。对于Enemy直接在BeginPlay中初始化ASC即可
+	InitBlitzAbilityActorInfo();
+	GrantPawnData();
+}
+
+void ABlitzPlayerCharacter::ClientInit()
+{
+	// 注意要先设置好ASC和AS。对于Enemy直接在BeginPlay中初始化ASC即可
+	InitBlitzAbilityActorInfo();
+}
+
 void ABlitzPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -53,16 +66,14 @@ void ABlitzPlayerCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	// 注意要先设置好ASC和AS。对于Enemy直接在Begin中初始化ASC即可
-	InitBlitzAbilityActorInfo();
-
-	// todo: Grant Pawn Data
+	ServerInit();
 }
 
 void ABlitzPlayerCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
-	InitBlitzAbilityActorInfo();
+	ClientInit();
 }
 
 void ABlitzPlayerCharacter::InitBlitzAbilityActorInfo()
@@ -81,7 +92,7 @@ void ABlitzPlayerCharacter::InitBlitzAbilityActorInfo()
 void ABlitzPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputVal = InputActionValue.Get<FVector2D>();
-
+	
 	AddControllerPitchInput(-InputVal.Y);
 	AddControllerYawInput(InputVal.X);
 }

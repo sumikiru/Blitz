@@ -13,5 +13,8 @@ UCLASS()
 class BLITZ_API UBlitzAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
-	
+
+public:
+	// Only called on the server
+	void ApplyGameplayEffects(const TArray<TSubclassOf<UGameplayEffect>>& Effects);
 };

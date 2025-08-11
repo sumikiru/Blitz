@@ -25,6 +25,9 @@ public:
 	// 多人游戏中客户端玩家角色在此时初始化，可以绑定输入InputMappingContext（BeginPlay()中不是最佳方案）
 	virtual void PawnClientRestart() override;
 
+	void ServerInit();
+	void ClientInit();
+
 protected:
 	// 服务端初始化ASC
 	virtual void PossessedBy(AController* NewController) override;

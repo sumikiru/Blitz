@@ -22,11 +22,10 @@ void ABlitzNPC::BeginPlay()
 	Super::BeginPlay();
 
 	BlitzAbilitySystemComponent->InitAbilityActorInfo(this, this);
+	GrantPawnData();
 }
 
 void ABlitzNPC::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-
-	// todo: Grant Pawn Data
 }
