@@ -8,7 +8,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
+#include "Blitz/Player/BlitzPlayerController.h"
 #include "Blitz/Player/BlitzPlayerState.h"
+#include "Blitz/UI/View/RootEnter.h"
+#include "Blueprint/UserWidget.h"
 
 ABlitzPlayerCharacter::ABlitzPlayerCharacter()
 {
@@ -19,6 +22,16 @@ ABlitzPlayerCharacter::ABlitzPlayerCharacter()
 
 	ViewCam = CreateDefaultSubobject<UCameraComponent>(TEXT("View Camera"));
 	ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+}
+
+ABlitzPlayerController* ABlitzPlayerCharacter::GetBlitzPlayerController() const
+{
+	return CastChecked<ABlitzPlayerController>(Controller, ECastCheckedType::NullAllowed);
+}
+
+ABlitzPlayerState* ABlitzPlayerCharacter::GetBlitzPlayerState() const
+{
+	return CastChecked<ABlitzPlayerState>(GetPlayerState(), ECastCheckedType::NullAllowed);
 }
 
 void ABlitzPlayerCharacter::PawnClientRestart()
@@ -46,6 +59,7 @@ void ABlitzPlayerCharacter::ClientInit()
 {
 	// 注意要先设置好ASC和AS。对于Enemy直接在BeginPlay中初始化ASC即可
 	InitBlitzAbilityActorInfo();
+	SpawnRootEnterWidget();
 }
 
 void ABlitzPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -119,4 +133,18 @@ FVector ABlitzPlayerCharacter::GetLookForwardDirection() const
 FVector ABlitzPlayerCharacter::GetMoveForwardDirection() const
 {
 	return FVector::CrossProduct(GetLookRightDirection(), FVector::UpVector);
+}
+
+void ABlitzPlayerCharacter::SpawnRootEnterWidget() const
+{
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	// 注意CreateWidget的第一个参数OwningObject*应该是PlayerController，而不是PlayerCharacter
+	if (URootEnter* RootEnterWidget = CreateWidget<URootEnter>(GetBlitzPlayerController(), RootEnterWidgetClass))
+	{
+		RootEnterWidget->AddToViewport();
+	}
 }

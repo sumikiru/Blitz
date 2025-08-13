@@ -18,10 +18,16 @@ public class Blitz : ModuleRules
 			"GameplayTasks", 
 			"GameplayTags", 
 			"NetCore",
+			"UMG",
+			"ModelViewViewModel",
+			"CommonUI",
 			"GameFeatures" 
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"UnLua",
+			"Lua"
+		});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

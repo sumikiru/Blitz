@@ -13,7 +13,9 @@
 				"EnhancedInput",
 				"ModularGameplay",
 				"GameFeatures",
-				"GameplayAbilities"
+				"GameplayAbilities",
+				"ModelViewViewModel",
+				"CommonUI"
 			]
 		}
 	],
@@ -61,6 +63,10 @@
 		},
 		{
 			"Name": "AnimationWarping",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
 			"Enabled": true
 		}
 	]

@@ -6,6 +6,9 @@
 #include "BlitzCharacter.h"
 #include "BlitzPlayerCharacter.generated.h"
 
+class ABlitzPlayerState;
+class ABlitzPlayerController;
+class URootEnter;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
@@ -22,9 +25,17 @@ class BLITZ_API ABlitzPlayerCharacter : public ABlitzCharacter
 
 public:
 	ABlitzPlayerCharacter();
+
+	UFUNCTION(BlueprintCallable, Category = "Blitz|Character")
+	ABlitzPlayerController* GetBlitzPlayerController() const;
+	UFUNCTION(BlueprintCallable, Category = "Blitz|Character")
+	ABlitzPlayerState* GetBlitzPlayerState() const;
+	
 	// 多人游戏中客户端玩家角色在此时初始化，可以绑定输入InputMappingContext（BeginPlay()中不是最佳方案）
 	virtual void PawnClientRestart() override;
 
+	// @note: 同一函数Init()在服务端/客户端行为不同，仅需要在函数内执行HasAuthority()判断。
+	// UFUNCTION(Server)这种适用于客户端请求服务器（注意得Client请求Server）执行敏感操作网络开销高（需RPC传输），安全性高（Validation）
 	void ServerInit();
 	void ClientInit();
 
@@ -58,10 +69,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* GameplayInputMappingContext;
 
+	// 类型必须为TSubclassOf<UUserWidget>而不是TSubclassOf<URootEnter>，否则CreateWidget的第二个参数类型无法转换
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> RootEnterWidgetClass;
+
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
 
 	FVector GetLookRightDirection() const;
 	FVector GetLookForwardDirection() const;
 	FVector GetMoveForwardDirection() const;
+
+	// Only create widget on the client
+	void SpawnRootEnterWidget() const;
 };
