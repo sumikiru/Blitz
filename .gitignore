@@ -83,3 +83,5 @@ Content/Script/.idea/
 
 # todo:need to include Game Feature files
 Plugins/
+Content/Script/LuaPanda.lua
+Content/Script/.vscode/launch.json

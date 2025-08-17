@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
+#include "ViewModelBindingInterface.h"
 #include "BlitzViewModelBase.generated.h"
 
 /*
@@ -36,12 +37,19 @@ StaticClass(), \
 this->BroadcastFieldValueChanged(FieldId); \
 return true;
 
+class UBlitzAbilitySystemComponent;
 /**
- * Blueprintable必须写，默认的VM不支持蓝图，这样蓝图ViewModel类才能继承
- * 需要继承UMVVMViewModelBase
+ * Blueprintable必须写，默认的VM不支持蓝图，这样蓝图ViewModel类才能继承 \n
+ * 需要继承UMVVMViewModelBase \n
+ * 需要继承接口IViewModelBindingInterface，确保实现属性绑定
  */
 UCLASS(Blueprintable)
-class BLITZ_API UBlitzViewModelBase : public UMVVMViewModelBase
+class BLITZ_API UBlitzViewModelBase : public UMVVMViewModelBase, public IViewModelBindingInterface
 {
 	GENERATED_BODY()
+
+public:
+	// UFUNCTION直接写父类中。父类已经有了，子类不应该再写UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
+	UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
+	virtual void BindAttributes_Implementation(UBlitzAbilitySystemComponent* InASC) override;
 };

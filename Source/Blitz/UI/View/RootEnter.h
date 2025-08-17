@@ -19,6 +19,10 @@ public:
 	// virtual void NativeConstruct() override;
 
 protected:
+	// 内部需要调用PushModel方法(BP_AddWidget)，用蓝图方便些。包含Push Model + SetOwnerASC + BindAttributes
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "UI|CommonActivatableWidget")
+	void BP_PushTargetWidgetAndBindAttributes(UCommonActivatableWidgetStack* InWidgetStack, TSubclassOf<UCommonActivatableWidget> TargetActivatableWidgetClass);
+	
 	// 刚进入就PushWidget的目标
 	// UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess))这样Lua访问不了，不能设置为private
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (BindWidget))

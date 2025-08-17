@@ -20,14 +20,16 @@ class BLITZ_API UValueGauge : public UCommonUserWidget
 public:
 	// 在预构造函数中初始化组件
 	virtual void NativePreConstruct() override;
-	
-	void SetValue(float NewValue, float NewMaxValue);
+
+	// 仅作了解，无法在View Binding中使用，应该使用VM_PercentBarBase中的GetValuePercent()和GetValueText();
+	void SetValue(float NewValue, float NewMaxValue) const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Visual")
 	FLinearColor BarColor;
-	UPROPERTY(VisibleAnywhere, meta=(BindWidget))
+	// 需要为BlueprintReadWrite，才能在蓝图中进行视图绑定(View Binding)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(BindWidget, AllowPrivateAccess))
 	TObjectPtr<UProgressBar> ProgressBar;
-	UPROPERTY(VisibleAnywhere, meta=(BindWidget))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(BindWidget, AllowPrivateAccess))
 	TObjectPtr<UCommonTextBlock> ValueText;
 };

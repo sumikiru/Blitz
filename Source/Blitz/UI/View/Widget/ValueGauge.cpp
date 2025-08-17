@@ -18,7 +18,7 @@ void UValueGauge::NativePreConstruct()
 	}
 }
 
-void UValueGauge::SetValue(float NewValue, float NewMaxValue)
+void UValueGauge::SetValue(float NewValue, float NewMaxValue) const
 {
 	if (NewMaxValue <= 0.f)
 	{

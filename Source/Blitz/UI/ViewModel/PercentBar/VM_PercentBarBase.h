@@ -3,24 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BlitzViewModelBase.h"
-#include "VM_HealthPercentBar.generated.h"
+#include "Blitz/UI/ViewModel/BlitzViewModelBase.h"
+#include "VM_PercentBarBase.generated.h"
 
+struct FOnAttributeChangeData;
+class UBlitzAbilitySystemComponent;
+struct FGameplayAttribute;
 /**
- * Blueprintable必须写，默认的VM不支持蓝图，这样蓝图ViewModel类才能继承
+ * @note 一个用户控件可以使用多个ViewModel，一个ViewModel也可以应用到多个用户控件。
  */
-UCLASS(Blueprintable, DisplayName = "Health Percent Bar ViewModel")
-class BLITZ_API UVM_HealthPercentBar : public UBlitzViewModelBase
+UCLASS(Abstract)
+class BLITZ_API UVM_PercentBarBase : public UBlitzViewModelBase
 {
 	GENERATED_BODY()
 
 public:
-	// @note: Getter/Setter不需要UFUNCTION()
-	float GetHealth() const;
-	float GetMaxHealth() const;
+	// 抽象类不能有UFUNCTION(BlueprintCallable, Category = "UI|Player")
+	virtual void BindAttributes_Implementation(UBlitzAbilitySystemComponent* InASC) override;
+	
+	void SetAndBoundToGameplayAttribute(UBlitzAbilitySystemComponent* InASC, const FGameplayAttribute& CurrentAttribute,
+	                                            const FGameplayAttribute& MaxAttribute);
 
-	void SetHealth(float NewHealth);
-	void SetMaxHealth(float NewMaxHealth);
+	// @note: Getter/Setter不需要UFUNCTION()
+	float GetCurrentValue() const;
+	float GetMaxValue() const;
+
+	void SetCurrentValue(float NewCurrentValue);
+	void SetMaxValue(float NewMaxValue);
 
 	/**
 	 * 1.必须具有带 FieldNotify 和 BlueprintPure 说明符的 UFUNCTION 宏\n
@@ -29,9 +38,15 @@ public:
 	 * 4.必须仅返回单个值（没有输出参数）
 	 */
 	UFUNCTION(BlueprintPure, FieldNotify)
-	float GetHealthPercent() const;
+	float GetValuePercent() const;
+
+	UFUNCTION(BlueprintPure, FieldNotify)
+	FText GetValueText() const;
 
 private:
+	void OnCurrentValueChanged(const FOnAttributeChangeData& ChangeData);
+	void OnMaxValueChanged(const FOnAttributeChangeData& ChangeData);
+	
 	/**
 	 * FieldNotify：使得属性可以用于通知广播，使得可以编写Getter/Setter，然后在蓝图中进行ViewBinding \n
 	 * Setter:此属性可以被设置，Setter函数的名称格式 Set[Variable Name],Health的Setter为：SetHealth，注意有且只能有一个参数 \n
@@ -41,7 +56,7 @@ private:
 	 * 此字段在ViewModel中使用Get/Set访问，在蓝图中是Public的，在蓝图中ViewBinding使用Get/Set
 	 */
 	UPROPERTY(BlueprintReadWrite, FieldNotify, Getter, Setter, meta = (AllowPrivateAccess))
-	float Health;
+	float CurrentValue = 100.f;
 	UPROPERTY(BlueprintReadWrite, FieldNotify, Getter, Setter, meta = (AllowPrivateAccess))
-	float MaxHealth;
+	float MaxValue = 180.f;	
 };
