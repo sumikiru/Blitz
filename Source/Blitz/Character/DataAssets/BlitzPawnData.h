@@ -39,4 +39,14 @@ public:
 	// Effects to apply to this pawn on spawn.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Blitz|Effects")
 	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
+
+	// Overhead Stats Gauge
+	// todo:敌人：准心对准时显示，队友：始终显示，自己：不显示
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Blitz|UI")
+	bool bShowOverheadStatsGauge = true;	// 暂未使用
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Blitz|UI")
+	float HeadStatGaugeVisibilityCheckUpdateGap = 1.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Blitz|UI")
+	float HeadStatGaugeVisibilityRangeSquared = 100000.f;
+	
 };

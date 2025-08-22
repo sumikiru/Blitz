@@ -53,12 +53,15 @@ void ABlitzPlayerCharacter::ServerInit()
 	// 注意要先设置好ASC和AS。对于Enemy直接在BeginPlay中初始化ASC即可
 	InitBlitzAbilityActorInfo();
 	GrantPawnData();
+	ConfigureOverheadStatsWidget(); // 同样需要用于Listen Server/Standalone
+	SpawnRootEnterWidget();	// 同样需要用于Listen Server/Standalone
 }
 
 void ABlitzPlayerCharacter::ClientInit()
 {
 	// 注意要先设置好ASC和AS。对于Enemy直接在BeginPlay中初始化ASC即可
 	InitBlitzAbilityActorInfo();
+	ConfigureOverheadStatsWidget();
 	SpawnRootEnterWidget();
 }
 

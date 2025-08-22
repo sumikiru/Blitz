@@ -23,6 +23,7 @@ void ABlitzNPC::BeginPlay()
 
 	BlitzAbilitySystemComponent->InitAbilityActorInfo(this, this);
 	GrantPawnData();
+	ConfigureOverheadStatsWidget();
 }
 
 void ABlitzNPC::PossessedBy(AController* NewController)

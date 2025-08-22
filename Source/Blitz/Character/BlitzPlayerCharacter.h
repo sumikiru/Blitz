@@ -53,7 +53,7 @@ protected:
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "View")
 	USpringArmComponent* CameraBoom;
-
+	
 	UPROPERTY(VisibleDefaultsOnly, Category = "View")
 	UCameraComponent* ViewCam;
 

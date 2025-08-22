@@ -8,6 +8,7 @@
 #include "DataAssets/BlitzPawnData.h"
 #include "BlitzCharacter.generated.h"
 
+class UWidgetComponent;
 class UBlitzPawnData;
 class UBlitzAttributeSet;
 class UBlitzAbilitySystemComponent;
@@ -26,6 +27,8 @@ class BLITZ_API ABlitzCharacter : public ACharacter, public IAbilitySystemInterf
 public:
 	ABlitzCharacter();
 
+	virtual void BeginPlay() override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// 拥有ASC的类，需要继承IAbilitySystemInterface并重写GetAbilitySystemComponent()方法
@@ -36,9 +39,14 @@ public:
 	// 由于启用了Push Model，必须手动标记脏数据并更新。只应该在Server端执行
 	void SetPawnData(const UBlitzPawnData* InPawnData);
 
+	// 判断该Character是不是该客户端玩家控制的
+	bool IsLocallyControlledByPlayer() const;
+	// 判断该Character是不是AI控制的（不论Server/Client）
+	bool IsControlledByAI() const;
+
 protected:
 	/**
-	 * 1. 对于AI控制的角色，ASC存在于Pawn中，通常在Pawn的 BeginPlay()方法中完成ASC在服务器端和客户端的初始化 \n
+	 * 1. 对于AI控制的角色，ASC存在于Pawn中，通常在Pawn的BeginPlay()方法中完成ASC在服务器端和客户端的初始化 \n
 	 * 2. 对于玩家控制的角色，如果ASC存在于Pawn中，通常在Pawn的PossessedBy()方法中完成ASC在服务器端的初始化，
 	 * 在PlayerController的AcknowledgePawn()方法中完成ASC在客户端的初始化 \n
 	 * 3. 对于玩家控制的角色，如果ASC存在于PlayerState中，通常在Pawn的PossessedBy()方法中完成ASC在服务器端的初始化（这一点与上述相同），
@@ -64,7 +72,24 @@ protected:
 	TSoftObjectPtr<const UBlitzPawnData> DefaultPawnData;
 
 	// 只能在服务端调用，且需要在InitBlitzAbilityActorInfo()之后调用（ASC实例化完成）
-	void GrantPawnData() const;
+	void GrantPawnData();
+	
+	/**=================================== UI ============================================== */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UWidgetComponent> OverheadWidgetComponent;
+	
+	// 必须在InitAbilityActorInfo之后执行（用到了ASC），且需要在Server端执行（Standalone/ListenServer）。不能直接加到BeginPlay中，ASC可能未初始化完成
+	void ConfigureOverheadStatsWidget() const;
+
+private:
+	// Visibility Control: 定时检测距离，距离过大则不可视
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "UI")
+	float HeadStatGaugeVisibilityCheckUpdateGap = 1.f;
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "UI")
+	float HeadStatGaugeVisibilityRangeSquared = 10000000.f;
+	
+	mutable FTimerHandle OverheadVisibilityUpdateTimerHandle;
+	void UpdateOverheadStatsGaugeVisibility() const;
 	
 public:
 	FORCEINLINE UBlitzAbilitySystemComponent* GetBlitzAbilitySystemComponent() const { return BlitzAbilitySystemComponent; }
