@@ -6,6 +6,8 @@
 #include "Blitz/BlitzLogChannels.h"
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(VM_PercentBarBase)
+
 void UVM_PercentBarBase::BindAttributes_Implementation(UBlitzAbilitySystemComponent* InASC)
 {
 }

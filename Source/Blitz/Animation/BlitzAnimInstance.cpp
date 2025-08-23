@@ -3,6 +3,8 @@
 
 #include "BlitzAnimInstance.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzAnimInstance)
+
 void UBlitzAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();

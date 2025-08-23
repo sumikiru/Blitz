@@ -13,6 +13,8 @@
 #include "Blitz/UI/View/RootEnter.h"
 #include "Blueprint/UserWidget.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzPlayerCharacter)
+
 ABlitzPlayerCharacter::ABlitzPlayerCharacter()
 {
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Boom"));

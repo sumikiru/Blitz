@@ -3,4 +3,4 @@
 
 #include "ViewModelBindingInterface.h"
 
-// Add default functionality here for any IViewModelBindingInterface functions that are not pure virtual.
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ViewModelBindingInterface)

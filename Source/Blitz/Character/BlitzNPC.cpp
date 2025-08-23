@@ -6,6 +6,8 @@
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
 #include "Blitz/AbilitySystem/Attributes/BlitzAttributeSet.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzNPC)
+
 ABlitzNPC::ABlitzNPC()
 {
 	// Enemy的ASC和AS直接在Character构造函数中实例化

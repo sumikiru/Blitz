@@ -7,6 +7,8 @@
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
 #include "Blitz/AbilitySystem/Attributes/BlitzAttributeSet.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzPlayerState)
+
 ABlitzPlayerState::ABlitzPlayerState()
 {
 	// Create ability system component, and set it to be explicitly replicated

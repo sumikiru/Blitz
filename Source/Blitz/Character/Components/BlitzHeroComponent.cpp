@@ -3,6 +3,8 @@
 
 #include "BlitzHeroComponent.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzHeroComponent)
+
 UBlitzHeroComponent::UBlitzHeroComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

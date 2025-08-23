@@ -7,6 +7,8 @@
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzAttributeSet)
+
 UBlitzAttributeSet::UBlitzAttributeSet()
 {
 	InitHealth(100.f);

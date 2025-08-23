@@ -7,6 +7,8 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ValueGauge)
+
 void UValueGauge::NativePreConstruct()
 {
 	Super::NativePreConstruct();

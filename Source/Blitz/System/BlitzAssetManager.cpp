@@ -5,6 +5,8 @@
 
 #include "Blitz/BlitzLogChannels.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzAssetManager)
+
 UBlitzAssetManager::UBlitzAssetManager()
 {
 }
