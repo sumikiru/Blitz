@@ -7,6 +7,6 @@
 UBlitzPawnData::UBlitzPawnData(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	CharacterClass = nullptr;
-	InputConfig = nullptr;
+	/*CharacterClass = nullptr;
+	InputConfig = nullptr;*/
 }

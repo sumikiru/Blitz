@@ -5,6 +5,7 @@
 
 #include "Blitz/BlitzLogChannels.h"
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
+#include "Blitz/AbilitySystem/Abilities/BlitzAbilitySet.h"
 #include "Blitz/UI/View/Widget/OverheadStatsGauge.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -68,17 +69,15 @@ void ABlitzCharacter::SetPawnData(const UBlitzPawnData* InPawnData)
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DefaultPawnData, this); // 仅能在Server端执行
 	DefaultPawnData = InPawnData;
 
-	/*
 	for (const UBlitzAbilitySet* AbilitySet : DefaultPawnData->AbilitySets)
 	{
 		if (AbilitySet)
 		{
-			AbilitySet->GiveToAbilitySystem(BlitzAbilitySystemComponent, nullptr);
+			AbilitySet->GiveToAbilitySystemComponent(BlitzAbilitySystemComponent, nullptr);
 		}
 	}
 
-	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_LyraAbilityReady);
-	*/
+	// todo: UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_LyraAbilityReady);
 
 	ForceNetUpdate(); // note
 }
@@ -127,7 +126,13 @@ void ABlitzCharacter::GrantPawnData()
 
 	if (const UBlitzPawnData* LoadedData = DefaultPawnData.LoadSynchronous())
 	{
-		BlitzAbilitySystemComponent->ApplyGameplayEffects(LoadedData->InitialEffects);
+		for (const UBlitzAbilitySet* AbilitySet : DefaultPawnData->AbilitySets)
+		{
+			if (AbilitySet)
+			{
+				AbilitySet->GiveToAbilitySystemComponent(BlitzAbilitySystemComponent, nullptr);
+			}
+		}
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, HeadStatGaugeVisibilityCheckUpdateGap, this);
 		HeadStatGaugeVisibilityCheckUpdateGap = LoadedData->HeadStatGaugeVisibilityCheckUpdateGap;
