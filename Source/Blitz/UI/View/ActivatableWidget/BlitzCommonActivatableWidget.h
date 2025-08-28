@@ -8,14 +8,32 @@
 #include "BlitzCommonActivatableWidget.generated.h"
 
 class UBlitzAbilitySystemComponent;
+
+UENUM(BlueprintType)
+enum class EBlitzWidgetInputMode : uint8
+{
+	Default,
+	GameAndMenu,
+	Game,
+	Menu
+};
+
 /**
  * 
  */
-UCLASS(meta = (DisableNativeTick))
+UCLASS(Blueprintable, meta = (DisableNativeTick))
 class BLITZ_API UBlitzCommonActivatableWidget : public UCommonActivatableWidget, public ISettingViewModelInterface
 {
 	GENERATED_BODY()
 
+public:
+	/**
+	 * 当你激活可激活控件时，它会使用 UCommonActivatableWidget::GetDesiredInputConfig 获取输入配置。
+	 * 此函数将默认返回null输入配置，但你可以将其覆盖为你想使用的任意逻辑。
+	 * 每当函数返回null输入配置时，CommonUI将回退为它上次使用的有效输入配置。
+	 */
+	virtual TOptional<FUIInputConfig> GetDesiredInputConfig() const override;
+	
 protected:
 	/**
 	 * @note: ViewModel的实例化发生在预构造和构造函数之间，应该在NativeConstruct()中执行该函数\n
@@ -34,4 +52,11 @@ protected:
 	virtual void SetOwnerAbilitySystemComponent(UAbilitySystemComponent* InASC);
 
 	TObjectPtr<UBlitzAbilitySystemComponent> OwnerAbilitySystemComponent;
+
+	/** The desired input mode to use while this UI is activated, for example do you want key presses to still reach the game/player controller? */
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	EBlitzWidgetInputMode InputConfig = EBlitzWidgetInputMode::Default;
+	/** The desired mouse behavior when the game gets input. */
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	EMouseCaptureMode GameMouseCaptureMode = EMouseCaptureMode::CapturePermanently;
 };  

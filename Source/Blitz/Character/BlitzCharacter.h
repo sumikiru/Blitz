@@ -64,6 +64,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
 	TObjectPtr<UBlitzAttributeSet> BlitzAttributeSet;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<USkeletalMeshComponent> PistolMeshComponent;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<USkeletalMeshComponent> RifleMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName PistolUnequippedSocket = FName("PistolUnequipped");
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName RifleUnequippedSocket = FName("RifleUnequipped");
+
 	UFUNCTION()
 	void OnRep_PawnData();
 
@@ -80,7 +89,22 @@ protected:
 	
 	// 必须在InitAbilityActorInfo之后执行（用到了ASC），且需要在Server端执行（Standalone/ListenServer）。不能直接加到BeginPlay中，ASC可能未初始化完成
 	void ConfigureOverheadStatsWidget() const;
+	
+	/**================================ Animation =========================================== */
+public:
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	void LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
+	UFUNCTION(NetMulticast, Reliable, WithValidation)
+	void NetMulticast_LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
+	bool NetMulticast_LinkNewAnimClassLayers_Validate(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TSubclassOf<UAnimInstance> UnarmedLayer;
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TSubclassOf<UAnimInstance> PistolLayer;
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TSubclassOf<UAnimInstance> RifleLayer;
+	
 private:
 	// Visibility Control: 定时检测距离，距离过大则不可视
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "UI")
@@ -94,6 +118,8 @@ private:
 public:
 	FORCEINLINE UBlitzAbilitySystemComponent* GetBlitzAbilitySystemComponent() const { return BlitzAbilitySystemComponent; }
 	FORCEINLINE UBlitzAttributeSet* GetBlitzAttributeSet() const { return BlitzAttributeSet; }
+	FORCEINLINE USkeletalMeshComponent* GetPistolMeshComponent() const { return PistolMeshComponent; }
+	FORCEINLINE USkeletalMeshComponent* GetRifleMeshComponent() const { return RifleMeshComponent; }
 
 	template <class T>
 	const T* GetPawnData() const { return Cast<T>(DefaultPawnData); }

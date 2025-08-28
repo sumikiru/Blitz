@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BlitzCharacter.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "BlitzPlayerCharacter.generated.h"
 
 class ABlitzPlayerState;
@@ -53,33 +54,52 @@ protected:
 private:
 	UPROPERTY(VisibleDefaultsOnly, Category = "View")
 	USpringArmComponent* CameraBoom;
-	
+	UPROPERTY(EditDefaultsOnly, Category = "View|Aim")
+	float NormalSpringArmLength = 500.f;
+	UPROPERTY(EditDefaultsOnly, Category = "View|Aim")
+	float AimZoomSpringArmLength = 400.f;
 	UPROPERTY(VisibleDefaultsOnly, Category = "View")
 	UCameraComponent* ViewCam;
-
+	
+#pragma region Input
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* JumpInputAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* LookInputAction;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputAction* MoveInputAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	UInputAction* AimInputAction;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	UInputMappingContext* GameplayInputMappingContext;
 
-	// 类型必须为TSubclassOf<UUserWidget>而不是TSubclassOf<URootEnter>，否则CreateWidget的第二个参数类型无法转换
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> RootEnterWidgetClass;
-
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
+	void HandleAimInput(const FInputActionValue& InputActionValue);
 
 	FVector GetLookRightDirection() const;
 	FVector GetLookForwardDirection() const;
 	FVector GetMoveForwardDirection() const;
+#pragma endregion
 
+	// 类型必须为TSubclassOf<UUserWidget>而不是TSubclassOf<URootEnter>，否则CreateWidget的第二个参数类型无法转换
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> RootEnterWidgetClass;
+	
 	// Only create widget on the client
 	void SpawnRootEnterWidget() const;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "View")
+	FORCEINLINE float GetSpringArmLength() const { return CameraBoom->TargetArmLength; }
+	UFUNCTION(BlueprintCallable, Category = "View")
+	FORCEINLINE void SetSpringArmLength(const float InTargetArmLength) const { CameraBoom->TargetArmLength = InTargetArmLength; }
+	UFUNCTION(BlueprintCallable, Category = "View")
+	FORCEINLINE float GetNormalSpringArmLength() const { return NormalSpringArmLength; }
+	UFUNCTION(BlueprintCallable, Category = "View")
+	FORCEINLINE float GetAimZoomSpringArmLength() const { return AimZoomSpringArmLength; }
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_HandleAimZooming();
 };

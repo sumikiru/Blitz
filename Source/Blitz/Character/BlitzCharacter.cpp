@@ -22,12 +22,31 @@ ABlitzCharacter::ABlitzCharacter()
 	// Overhead Stats Gauge显示在玩家/NPC头顶，应作为组件，同时这样也方便显示每个人的属性
 	OverheadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Over Head Widget Component"));
 	OverheadWidgetComponent->SetupAttachment(GetRootComponent());
+
+	// 还需要手动设置父项套接字(UnequippedSocket)
+	PistolMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Pistol Mesh"));
+	PistolMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PistolMeshComponent->SetupAttachment(GetMesh(), PistolUnequippedSocket);
+	PistolMeshComponent->SetIsReplicated(true); // 注意，否则无法同步
+
+	RifleMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Rifle Mesh"));
+	RifleMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RifleMeshComponent->SetupAttachment(GetMesh(), RifleUnequippedSocket);
+	RifleMeshComponent->SetIsReplicated(true);
 }
 
 void ABlitzCharacter::BeginPlay()
 {
 	// 所有网络模式均会执行（含单机Standalone、监听服务器Listen Server、客户端），BeginPlay()在游戏开始/玩家生成（含重生）时会调用
 	Super::BeginPlay();
+
+	// 初始为携带Pistol
+	GetMesh()->LinkAnimClassLayers(PistolLayer);
+	GetPistolMeshComponent()->AttachToComponent(
+		GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		FName("WeaponEquipped")
+	);
 }
 
 void ABlitzCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -192,6 +211,32 @@ void ABlitzCharacter::ConfigureOverheadStatsWidget() const
 	}
 }
 
+void ABlitzCharacter::LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer)
+{
+	// 由Server端触发
+	if (HasAuthority())
+	{
+		NetMulticast_LinkNewAnimClassLayers(InClass, bLinkAnimLayer);
+	}
+}
+
+bool ABlitzCharacter::NetMulticast_LinkNewAnimClassLayers_Validate(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer)
+{
+	return InClass != nullptr;
+}
+
+void ABlitzCharacter::NetMulticast_LinkNewAnimClassLayers_Implementation(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer)
+{
+	if (bLinkAnimLayer)
+	{
+		GetMesh()->LinkAnimClassLayers(InClass);
+	}
+	else
+	{
+		GetMesh()->UnlinkAnimClassLayers(InClass);
+	}
+}
+
 void ABlitzCharacter::UpdateOverheadStatsGaugeVisibility() const
 {
 	// PlayerIndex0: LocalPlayer
@@ -200,7 +245,7 @@ void ABlitzCharacter::UpdateOverheadStatsGaugeVisibility() const
 		// 该Character与LocalPlayerPawn的距离平方
 		const float DistSquared = FVector::DistSquared(GetActorLocation(), LocalPlayerPawn->GetActorLocation());
 		const bool bShouldHideWidgetComponent = DistSquared > HeadStatGaugeVisibilityRangeSquared;
-		
+
 		OverheadWidgetComponent->SetHiddenInGame(bShouldHideWidgetComponent);
 	}
 	else

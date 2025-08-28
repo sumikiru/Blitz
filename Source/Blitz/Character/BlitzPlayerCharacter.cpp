@@ -77,6 +77,7 @@ void ABlitzPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ThisClass::Jump);
 		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput);
 		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
+		EnhancedInputComponent->BindAction(AimInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleAimInput);
 	}
 }
 
@@ -123,6 +124,12 @@ void ABlitzPlayerCharacter::HandleMoveInput(const FInputActionValue& InputAction
 	InputVal.Normalize();
 
 	AddMovementInput(GetMoveForwardDirection() * InputVal.Y + GetLookRightDirection() * InputVal.X);
+}
+
+void ABlitzPlayerCharacter::HandleAimInput(const FInputActionValue& InputActionValue)
+{
+	// 涉及Timeline，图方便直接写在BP里
+	BP_HandleAimZooming();
 }
 
 FVector ABlitzPlayerCharacter::GetLookRightDirection() const
