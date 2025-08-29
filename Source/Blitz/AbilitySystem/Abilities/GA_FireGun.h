@@ -6,6 +6,7 @@
 #include "BlitzGameplayAbility.h"
 #include "GA_FireGun.generated.h"
 
+enum class EWeaponEquipState : uint8;
 /**
  * 
  */
@@ -19,7 +20,11 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+protected:
+	UFUNCTION(BlueprintCallable)
+	UAnimMontage* GetRelatedFireGunMontage();
+	
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	TObjectPtr<UAnimMontage> FireGunMontage;
+	TMap<EWeaponEquipState, TObjectPtr<UAnimMontage>> FireGunMontages;
 };

@@ -82,6 +82,9 @@ protected:
 
 	// 只能在服务端调用，且需要在InitBlitzAbilityActorInfo()之后调用（ASC实例化完成）
 	void GrantPawnData();
+
+	// 在Server端调用
+	void AddInitialGameplayTags();
 	
 	/**=================================== UI ============================================== */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")

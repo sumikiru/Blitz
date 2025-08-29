@@ -6,6 +6,8 @@
 #include "BlitzGameplayAbility.h"
 #include "GA_EquipWeapon.generated.h"
 
+class ABlitzCharacter;
+
 UENUM(BlueprintType)
 enum class EWeaponEquipState : uint8
 {
@@ -38,6 +40,10 @@ protected:
 	*/
 	
 private:
+	/** 更新当前玩家状态标签，为Reload实现条件做准备 */
+	UFUNCTION(BlueprintCallable)
+	void UpdateStatusTag(ABlitzCharacter* TargetAvatarCharacter);
+	
 	// 注意，需要设置其插槽为"FName("LyraMovement.FullBodyAdditivePreAim")"，和AnimBP声明的插槽对应，才能正常播放
 	// 如果是AnimSequence，则需要在CreatePlayMontageAndWaitProxy中指定（前提是该AnimSequence中有该插槽），建议使用Montage不易出错
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")

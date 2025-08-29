@@ -2,9 +2,13 @@
 
 
 #include "GA_EquipWeapon.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "Abilities//Tasks/AbilityTask_PlayMontageAndWait.h"
-#include "Abilities//Tasks/AbilityTask_PlayAnimAndWait.h"
+#include "Blitz/BlitzGameplayTags.h"
 #include "Blitz/BlitzLogChannels.h"
+#include "GameplayTagContainer.h"
 #include "Blitz/Character/BlitzCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_EquipWeapon)
@@ -68,6 +72,8 @@ void UGA_EquipWeapon::EquipWeapon()
 			RifleAttachSocket = FName("RifleUnequipped");
 		}
 
+		UpdateStatusTag(TargetAvatarCharacter);
+
 		if (TargetAvatarCharacter->GetMesh()->DoesSocketExist(PistolAttachSocket))
 		{
 			TargetAvatarCharacter->GetPistolMeshComponent()->AttachToComponent(
@@ -95,5 +101,32 @@ void UGA_EquipWeapon::EquipWeapon()
 			UE_LOG(LogBlitzAbilitySystem, Warning, TEXT("Rifle Mesh Component attach to character skeletal mesh failed.please check socket name [%s]."),
 			       *RifleAttachSocket.ToString());
 		}
+	}
+}
+
+void UGA_EquipWeapon::UpdateStatusTag(ABlitzCharacter* TargetAvatarCharacter)
+{
+	// 遍历并移除所有以"Status_EquippingWeapon"为前缀的Tag
+	FGameplayTagContainer TagsToRemove;
+	TagsToRemove.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
+	TagsToRemove.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Rifle);
+
+	// 移除筛选出的Tag（如果标签不存在则不做处理）
+	UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(TargetAvatarCharacter, TagsToRemove, true);
+
+	const FGameplayTagContainer PistolTagContainer(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
+	const FGameplayTagContainer RifleTagContainer(BlitzGameplayTags::Status_EquippingWeapon_Rifle);
+
+	// 添加新的Status_标签
+	switch (WeaponEquipState)
+	{
+	case EWeaponEquipState::Pistol:
+		UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(TargetAvatarCharacter, PistolTagContainer, true);
+		break;
+	case EWeaponEquipState::Rifle:
+		UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(TargetAvatarCharacter, RifleTagContainer, true);
+		break;
+	case EWeaponEquipState::Unarmed:
+		break;
 	}
 }

@@ -2,8 +2,14 @@
 
 
 #include "GA_FireGun.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "GA_EquipWeapon.h"
 #include "Abilities//Tasks/AbilityTask_PlayMontageAndWait.h"
-#include "Abilities/Tasks/AbilityTask_PlayAnimAndWait.h"
+#include "Blitz/BlitzGameplayTags.h"
+#include "Blitz/BlitzLogChannels.h"
+#include "Blitz/Character/BlitzCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_FireGun)
 
@@ -25,7 +31,7 @@ void UGA_FireGun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		UAbilityTask_PlayMontageAndWait* PlayFireGunMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 			this,
 			FName("FireGun"),
-			FireGunMontage
+			GetRelatedFireGunMontage()
 		);
 		PlayFireGunMontageTask->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlayFireGunMontageTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
@@ -45,4 +51,25 @@ void UGA_FireGun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		PlayGunFireAnimSequenceTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlayGunFireAnimSequenceTask->ReadyForActivation();*/
 	}
+}
+
+UAnimMontage* UGA_FireGun::GetRelatedFireGunMontage()
+{
+	if (ABlitzCharacter* TargetAvatarCharacter = Cast<ABlitzCharacter>(GetActorInfo().AvatarActor))
+	{
+		if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetAvatarCharacter))
+		{
+			if (ASC->HasMatchingGameplayTag(BlitzGameplayTags::Status_EquippingWeapon_Rifle))
+			{
+				return FireGunMontages[EWeaponEquipState::Rifle];
+			}
+			if (ASC->HasMatchingGameplayTag(BlitzGameplayTags::Status_EquippingWeapon_Pistol))
+			{
+				return FireGunMontages[EWeaponEquipState::Pistol];
+			}
+		}
+	}
+
+	UE_LOG(LogBlitzAbilitySystem, Error, TEXT("Cannot find related fire gun montage!"));
+	return nullptr;
 }

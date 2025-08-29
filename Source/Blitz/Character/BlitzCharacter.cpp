@@ -3,6 +3,8 @@
 
 #include "BlitzCharacter.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "Blitz/BlitzGameplayTags.h"
 #include "Blitz/BlitzLogChannels.h"
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
 #include "Blitz/AbilitySystem/Abilities/BlitzAbilitySet.h"
@@ -160,6 +162,24 @@ void ABlitzCharacter::GrantPawnData()
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, HeadStatGaugeVisibilityRangeSquared, this);
 		HeadStatGaugeVisibilityRangeSquared = LoadedData->HeadStatGaugeVisibilityRangeSquared;
 	}
+
+	// 添加状态标签
+	AddInitialGameplayTags();
+}
+
+void ABlitzCharacter::AddInitialGameplayTags()
+{
+	/**
+	 * 不能在BeginPlay中写，ASC还未初始化完成
+	 * @note 应该设置bShouldReplicate为true，否则不会同步!
+	 * 正确写法（推荐）：
+	 */
+	FGameplayTagContainer TagContainer;
+	TagContainer.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
+	
+	UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(this, TagContainer, true);
+	// 错误写法（未生效，原因未知）：
+	// BlitzAbilitySystemComponent->AddReplicatedLooseGameplayTag(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
 }
 
 void ABlitzCharacter::ConfigureOverheadStatsWidget() const

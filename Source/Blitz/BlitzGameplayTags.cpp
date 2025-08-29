@@ -23,9 +23,29 @@ namespace BlitzGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Ability_ActivateFail_ActivationGroup, "Ability.ActivateFail.ActivationGroup",
 	                               "Ability failed to activate because of its activation group.");
 
+	// Native Input
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Move, "InputTag.Move");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Look, "InputTag.Look");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Jump, "InputTag.Jump");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Aim, "InputTag.Aim");
 
+	// Ability
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Ability_EquipWeapon_Rifle, "Ability.EquipWeapon.Rifle");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Ability_EquipWeapon_Pistol, "Ability.EquipWeapon.Pistol");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Ability_EquipWeapon_Unarmed, "Ability.EquipWeapon.Unarmed");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Ability_FireGun, "Ability.FireGun");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Ability_WeaponReload, "Ability.WeaponReload");
+	
+	// Ability Input
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(InputTag_Ability_EquipWeapon_Rifle, "InputTag.Ability.EquipWeapon.Rifle");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(InputTag_Ability_EquipWeapon_Pistol, "InputTag.Ability.EquipWeapon.Pistol");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(InputTag_Ability_EquipWeapon_Unarmed, "InputTag.Ability.EquipWeapon.Unarmed");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(InputTag_Ability_FireGun, "InputTag.Ability.FireGun");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(InputTag_Ability_WeaponReload, "InputTag.Ability.WeaponReload");
+
+	// Status
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_EquippingWeapon_Rifle, "Status.EquippingWeapon.Rifle");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_EquippingWeapon_Pistol, "Status.EquippingWeapon.Pistol");
 
 	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString)
 	{
