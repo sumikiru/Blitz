@@ -7,6 +7,7 @@
 #include "Engine/DataAsset.h"
 #include "BlitzInputConfig.generated.h"
 
+class UInputMappingContext;
 class UInputAction;
 
 /**
@@ -25,6 +26,21 @@ struct FBlitzInputAction
 };
 
 /**
+ * Struct used to map input actions to keyboard.
+ */
+USTRUCT(BlueprintType)
+struct FBlitzInputMappingContextAndPriority
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	UInputMappingContext* InputMappingContext = nullptr;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 Priority = 0;
+};
+
+/**
  * Non-mutable data asset that contains input configuration properties.
  */
 UCLASS(BlueprintType, Const)
@@ -33,8 +49,6 @@ class BLITZ_API UBlitzInputConfig : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UBlitzInputConfig();
-
 	const UInputAction* FindNativeInputActionByTag(const FGameplayTag& InputTag, bool bLogNotFound = true) const;
 	const UInputAction* FindAbilityInputActionByTag(const FGameplayTag& InputTag, bool bLogNotFound = true) const;
 
@@ -45,4 +59,8 @@ public:
 	// List of input actions used by the owner.  These input actions are mapped to a gameplay tag and are automatically bound to abilities with matching input tags.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (TitleProperty = "InputAction"))
 	TArray<FBlitzInputAction> AbilityInputActions;
+
+	// List of input mapping contexts used by the owner.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TArray<FBlitzInputMappingContextAndPriority> InputMappingContextAndPriorities;
 };

@@ -31,7 +31,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	int32 AbilityLevel = 1;
 	// Tag used to process input for the ability.
-	UPROPERTY(EditDefaultsOnly, meta = (Categories = "Input")) // meta = (Categories = "Input")筛选GameplayTag
+	UPROPERTY(EditDefaultsOnly, meta = (Categories = "InputTag")) // meta = (Categories = "InputTag")筛选GameplayTag
 	FGameplayTag InputTag;
 };
 

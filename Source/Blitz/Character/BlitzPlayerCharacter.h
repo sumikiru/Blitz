@@ -7,6 +7,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "BlitzPlayerCharacter.generated.h"
 
+struct FGameplayTag;
+class UBlitzInputComponent;
 class ABlitzPlayerState;
 class ABlitzPlayerController;
 class URootEnter;
@@ -62,17 +64,8 @@ private:
 	UCameraComponent* ViewCam;
 	
 #pragma region Input
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* JumpInputAction;
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* LookInputAction;
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* MoveInputAction;
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputAction* AimInputAction;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	UInputMappingContext* GameplayInputMappingContext;
+	UPROPERTY(VisibleDefaultsOnly, Category = "Input")
+	TObjectPtr<UBlitzInputComponent> BlitzInputComponent;
 
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
@@ -81,6 +74,10 @@ private:
 	FVector GetLookRightDirection() const;
 	FVector GetLookForwardDirection() const;
 	FVector GetMoveForwardDirection() const;
+
+	// 函数不能写成void Input_AbilityInputTagPressed(const FGameplayTag& InputTag) const;这和BindAction接受的参数类型有关
+	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
+	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
 #pragma endregion
 
 	// 类型必须为TSubclassOf<UUserWidget>而不是TSubclassOf<URootEnter>，否则CreateWidget的第二个参数类型无法转换
@@ -99,6 +96,8 @@ public:
 	FORCEINLINE float GetNormalSpringArmLength() const { return NormalSpringArmLength; }
 	UFUNCTION(BlueprintCallable, Category = "View")
 	FORCEINLINE float GetAimZoomSpringArmLength() const { return AimZoomSpringArmLength; }
+	UFUNCTION(BlueprintCallable, Category = "Input")
+	FORCEINLINE UBlitzInputComponent* GetBlitzInputComponent() const { return BlitzInputComponent; }
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_HandleAimZooming();

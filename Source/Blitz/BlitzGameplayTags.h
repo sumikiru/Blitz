@@ -40,4 +40,5 @@ namespace BlitzGameplayTags
 	// Status
 	BLITZ_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_EquippingWeapon_Rifle);
 	BLITZ_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_EquippingWeapon_Pistol);
+	BLITZ_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Status_AbilityInputBlocked);
 };

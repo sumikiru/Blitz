@@ -20,6 +20,10 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
+	// WaitInputPressTask->OnPress绑定的函数需要一个参数，同时还需要UFUNCTION()宏标记，且不能为private
+	UFUNCTION()
+	void EndFireGunAbility(float TimeWaited);
+	
 protected:
 	UFUNCTION(BlueprintCallable)
 	UAnimMontage* GetRelatedFireGunMontage();

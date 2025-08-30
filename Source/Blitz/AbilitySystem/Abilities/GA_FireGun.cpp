@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "GA_EquipWeapon.h"
 #include "Abilities//Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities//Tasks/AbilityTask_WaitInputPress.h"
 #include "Blitz/BlitzGameplayTags.h"
 #include "Blitz/BlitzLogChannels.h"
 #include "Blitz/Character/BlitzCharacter.h"
@@ -35,21 +36,12 @@ void UGA_FireGun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		);
 		PlayFireGunMontageTask->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlayFireGunMontageTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
-		PlayFireGunMontageTask->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
+		//PlayFireGunMontageTask->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlayFireGunMontageTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlayFireGunMontageTask->ReadyForActivation(); // don't forget, must call it in C++
-		
-		/*UAbilityTask_PlayAnimAndWait* PlayGunFireAnimSequenceTask = UAbilityTask_PlayAnimAndWait::CreatePlayAnimAndWaitProxy(
-			this,
-			FName("FireGun"),
-			GunFireAnimSequence,
-			FName("LyraMovement.FullBodyAdditivePreAim")	// 注意！与AnimBP以及Montage的插槽名对应，包括其组名LyraMovement
-		);
-		PlayGunFireAnimSequenceTask->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
-		PlayGunFireAnimSequenceTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
-		PlayGunFireAnimSequenceTask->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
-		PlayGunFireAnimSequenceTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
-		PlayGunFireAnimSequenceTask->ReadyForActivation();*/
+
+		UAbilityTask_WaitInputPress* WaitInputPressTask = UAbilityTask_WaitInputPress::WaitInputPress(this);
+		WaitInputPressTask->OnPress.AddDynamic(this, &ThisClass::EndFireGunAbility);
 	}
 }
 
@@ -72,4 +64,11 @@ UAnimMontage* UGA_FireGun::GetRelatedFireGunMontage()
 
 	UE_LOG(LogBlitzAbilitySystem, Error, TEXT("Cannot find related fire gun montage!"));
 	return nullptr;
+}
+
+void UGA_FireGun::EndFireGunAbility(float TimeWaited)
+{
+	K2_EndAbility();
+
+	UE_LOG(LogTemp, Display, TEXT("FireGun Ended"));
 }

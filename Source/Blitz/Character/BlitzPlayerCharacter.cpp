@@ -7,7 +7,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Blitz/BlitzGameplayTags.h"
 #include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
+#include "Blitz/Input/BlitzInputComponent.h"
 #include "Blitz/Player/BlitzPlayerController.h"
 #include "Blitz/Player/BlitzPlayerState.h"
 #include "Blitz/UI/View/RootEnter.h"
@@ -24,6 +26,9 @@ ABlitzPlayerCharacter::ABlitzPlayerCharacter()
 
 	ViewCam = CreateDefaultSubobject<UCameraComponent>(TEXT("View Camera"));
 	ViewCam->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+	// 不需要同步，仅用于本地
+	BlitzInputComponent = CreateDefaultSubobject<UBlitzInputComponent>(TEXT("Input Component"));
 }
 
 ABlitzPlayerController* ABlitzPlayerCharacter::GetBlitzPlayerController() const
@@ -40,12 +45,20 @@ void ABlitzPlayerCharacter::PawnClientRestart()
 {
 	Super::PawnClientRestart();
 
-	if (const APlayerController* OwningPlayerController = GetController<APlayerController>())
+	if (const UBlitzPawnData* LoadedData = DefaultPawnData.LoadSynchronous())
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = OwningPlayerController->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (const UBlitzInputConfig* InputConfig = LoadedData->InputConfig)
 		{
-			InputSubsystem->RemoveMappingContext(GameplayInputMappingContext);
-			InputSubsystem->AddMappingContext(GameplayInputMappingContext, 0);
+			if (const APlayerController* OwningPlayerController = GetController<APlayerController>())
+			{
+				if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem = OwningPlayerController->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+				{
+					/*InputSubsystem->RemoveMappingContext(GameplayInputMappingContext);
+					InputSubsystem->AddMappingContext(GameplayInputMappingContext, 0);*/
+					BlitzInputComponent->RemoveInputMappingContexts(InputConfig, InputSubsystem);
+					BlitzInputComponent->AddInputMappingContexts(InputConfig, InputSubsystem);
+				}
+			}
 		}
 	}
 }
@@ -56,7 +69,7 @@ void ABlitzPlayerCharacter::ServerInit()
 	InitBlitzAbilityActorInfo();
 	GrantPawnData();
 	ConfigureOverheadStatsWidget(); // 同样需要用于Listen Server/Standalone
-	SpawnRootEnterWidget();	// 同样需要用于Listen Server/Standalone
+	SpawnRootEnterWidget(); // 同样需要用于Listen Server/Standalone
 }
 
 void ABlitzPlayerCharacter::ClientInit()
@@ -71,13 +84,22 @@ void ABlitzPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	// 注意此时不是UBlitzInputComponent* BlitzIC = CastChecked<UBlitzInputComponent>(PlayerInputComponent);
+	// 一是有自己的BlitzInputComponent负责输入，二是这个变量BlitzIC会导致access error
+	if (const UBlitzPawnData* LoadedData = DefaultPawnData.LoadSynchronous())
 	{
-		// 函数Jump()未区分是否装备武器，动画交由AnimBP实现
-		EnhancedInputComponent->BindAction(JumpInputAction, ETriggerEvent::Triggered, this, &ThisClass::Jump);
-		EnhancedInputComponent->BindAction(LookInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput);
-		EnhancedInputComponent->BindAction(MoveInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput);
-		EnhancedInputComponent->BindAction(AimInputAction, ETriggerEvent::Triggered, this, &ThisClass::HandleAimInput);
+		if (const UBlitzInputConfig* InputConfig = LoadedData->InputConfig)
+		{
+			BlitzInputComponent->BindNativeAction(InputConfig, BlitzGameplayTags::InputTag_Look, ETriggerEvent::Triggered, this, &ThisClass::HandleLookInput, true);
+			BlitzInputComponent->BindNativeAction(InputConfig, BlitzGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::HandleMoveInput, true);
+			BlitzInputComponent->BindNativeAction(InputConfig, BlitzGameplayTags::InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Jump, true);
+			BlitzInputComponent->BindNativeAction(InputConfig, BlitzGameplayTags::InputTag_Aim, ETriggerEvent::Triggered, this, &ThisClass::HandleAimInput, true);
+
+			// @note: 输入绑定流程详见https://zhuanlan.zhihu.com/p/611735265
+			// 以及https://zhuanlan.zhihu.com/p/690425805
+			TArray<uint32> BindHandles;
+			BlitzInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, BindHandles);
+		}
 	}
 }
 
@@ -112,7 +134,7 @@ void ABlitzPlayerCharacter::InitBlitzAbilityActorInfo()
 void ABlitzPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValue)
 {
 	const FVector2D InputVal = InputActionValue.Get<FVector2D>();
-	
+
 	AddControllerPitchInput(-InputVal.Y);
 	AddControllerYawInput(InputVal.X);
 }
@@ -145,6 +167,20 @@ FVector ABlitzPlayerCharacter::GetLookForwardDirection() const
 FVector ABlitzPlayerCharacter::GetMoveForwardDirection() const
 {
 	return FVector::CrossProduct(GetLookRightDirection(), FVector::UpVector);
+}
+
+void ABlitzPlayerCharacter::Input_AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	checkf(BlitzAbilitySystemComponent, TEXT("BlitzAbilitySystemComponent has not initialized already."));
+
+	BlitzAbilitySystemComponent->AbilityInputTagPressed(InputTag);
+}
+
+void ABlitzPlayerCharacter::Input_AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	checkf(BlitzAbilitySystemComponent, TEXT("BlitzAbilitySystemComponent has not initialized already."));
+
+	BlitzAbilitySystemComponent->AbilityInputTagReleased(InputTag);
 }
 
 void ABlitzPlayerCharacter::SpawnRootEnterWidget() const

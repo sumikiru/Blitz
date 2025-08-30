@@ -46,6 +46,7 @@ namespace BlitzGameplayTags
 	// Status
 	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_EquippingWeapon_Rifle, "Status.EquippingWeapon.Rifle");
 	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_EquippingWeapon_Pistol, "Status.EquippingWeapon.Pistol");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_AbilityInputBlocked, "Status.AbilityInputBlocked");
 
 	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString)
 	{

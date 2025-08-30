@@ -7,10 +7,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzInputConfig)
 
-UBlitzInputConfig::UBlitzInputConfig()
-{
-}
-
 const UInputAction* UBlitzInputConfig::FindNativeInputActionByTag(const FGameplayTag& InputTag, bool bLogNotFound) const
 {
 	for (const FBlitzInputAction& Action : NativeInputActions)

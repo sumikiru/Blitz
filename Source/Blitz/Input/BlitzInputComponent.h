@@ -14,19 +14,19 @@ class UBlitzInputConfig;
 /**
  * Component used to manage input mappings and bindings using an input config data asset(Config = Input).
  * 配置存在DefaultInput.ini中
+ * 可以参考https://zhuanlan.zhihu.com/p/611735265
  */
-UCLASS(Config = Input)
+UCLASS()
 class BLITZ_API UBlitzInputComponent : public UEnhancedInputComponent
 {
 	GENERATED_BODY()
 
 public:
-	UBlitzInputComponent();
+	// InputMappingContext
+	void AddInputMappingContexts(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
+	void RemoveInputMappingContexts(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
 
-	// todo:添加逻辑
-	void AddInputMappings(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
-	void RemoveInputMappings(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const;
-
+	// InputAction
 	template <class UserClass, typename FuncType>
 	void BindNativeAction(const UBlitzInputConfig* InputConfig, const FGameplayTag& InputTag, ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func,
 	                      bool bLogIfNotFound = false);
@@ -51,6 +51,7 @@ void UBlitzInputComponent::BindNativeAction(const UBlitzInputConfig* InputConfig
 	}
 }
 
+// 在AbilitySet中为GA绑定InputTag
 template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 void UBlitzInputComponent::BindAbilityActions(const UBlitzInputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc,
 	ReleasedFuncType ReleasedFunc, TArray<uint32>& BindHandles)

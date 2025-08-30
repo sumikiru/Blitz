@@ -7,20 +7,34 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzInputComponent)
 
-UBlitzInputComponent::UBlitzInputComponent()
-{
-}
-
-void UBlitzInputComponent::AddInputMappings(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const
+void UBlitzInputComponent::AddInputMappingContexts(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const
 {
 	checkf(InputConfig, TEXT("InputConfig is nullptr"));
 	checkf(InputSubsystem, TEXT("InputSubsystem is nullptr"));
+
+	for (const FBlitzInputMappingContextAndPriority& Mapping : InputConfig->InputMappingContextAndPriorities)
+	{
+		if (const UInputMappingContext* IMC = Mapping.InputMappingContext)
+		{
+			FModifyContextOptions Options{};
+			Options.bIgnoreAllPressedKeysUntilRelease = false;
+			InputSubsystem->AddMappingContext(IMC, Mapping.Priority, Options);
+		}
+	}
 }
 
-void UBlitzInputComponent::RemoveInputMappings(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const
+void UBlitzInputComponent::RemoveInputMappingContexts(const UBlitzInputConfig* InputConfig, UEnhancedInputLocalPlayerSubsystem* InputSubsystem) const
 {
 	checkf(InputConfig, TEXT("InputConfig is nullptr"));
 	checkf(InputSubsystem, TEXT("InputSubsystem is nullptr"));
+
+	for (const FBlitzInputMappingContextAndPriority& Mapping : InputConfig->InputMappingContextAndPriorities)
+	{
+		if (const UInputMappingContext* IMC = Mapping.InputMappingContext)
+		{
+			InputSubsystem->RemoveMappingContext(IMC);
+		}
+	}
 }
 
 void UBlitzInputComponent::RemoveBinds(TArray<uint32>& BindHandles)
