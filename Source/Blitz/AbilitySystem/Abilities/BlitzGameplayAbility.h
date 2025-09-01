@@ -30,9 +30,15 @@ class BLITZ_API UBlitzGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+	UBlitzGameplayAbility();
+
 protected:
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+	UAnimInstance* GetOwnerAnimInstance() const;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability Activation")
-	EBlitzAbilityActivationPolicy ActivationPolicy;
+	EBlitzAbilityActivationPolicy ActivationPolicy = EBlitzAbilityActivationPolicy::OnInputTriggered;
 
 public:
 	FORCEINLINE EBlitzAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }

@@ -9,9 +9,16 @@
 #include "Blitz/BlitzGameplayTags.h"
 #include "Blitz/BlitzLogChannels.h"
 #include "GameplayTagContainer.h"
+#include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
 #include "Blitz/Character/BlitzCharacter.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GA_EquipWeapon)
+
+UGA_EquipWeapon::UGA_EquipWeapon()
+{
+	ActivationPolicy = EBlitzAbilityActivationPolicy::OnInputTriggered;
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+}
 
 void UGA_EquipWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                       const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -104,15 +111,31 @@ void UGA_EquipWeapon::EquipWeapon()
 	}
 }
 
+/**
+ * 也可以借助AN_SendGameplayEvent更改
+ */
 void UGA_EquipWeapon::UpdateStatusTag(ABlitzCharacter* TargetAvatarCharacter)
 {
 	// 遍历并移除所有以"Status_EquippingWeapon"为前缀的Tag
-	FGameplayTagContainer TagsToRemove;
-	TagsToRemove.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
-	TagsToRemove.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Rifle);
+	FGameplayTagContainer AllEquippingTags;
+	AllEquippingTags.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
+	AllEquippingTags.AddTag(BlitzGameplayTags::Status_EquippingWeapon_Rifle);
+
+	// 获取角色当前拥有的标签
+	FGameplayTagContainer OwnedTags;
+	if (const UBlitzAbilitySystemComponent* TargetASC = TargetAvatarCharacter->GetBlitzAbilitySystemComponent())
+	{
+		TargetASC->GetOwnedGameplayTags(OwnedTags);
+	}
+
+	// 找出交集（即实际存在且需要移除的标签）
+	const FGameplayTagContainer& TagsToRemove = OwnedTags.Filter(AllEquippingTags);
 
 	// 移除筛选出的Tag（如果标签不存在则不做处理）
-	UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(TargetAvatarCharacter, TagsToRemove, true);
+	if (!TagsToRemove.IsEmpty())
+	{
+		UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(TargetAvatarCharacter, TagsToRemove, true);
+	}
 
 	const FGameplayTagContainer PistolTagContainer(BlitzGameplayTags::Status_EquippingWeapon_Pistol);
 	const FGameplayTagContainer RifleTagContainer(BlitzGameplayTags::Status_EquippingWeapon_Rifle);
@@ -129,4 +152,6 @@ void UGA_EquipWeapon::UpdateStatusTag(ABlitzCharacter* TargetAvatarCharacter)
 	case EWeaponEquipState::Unarmed:
 		break;
 	}
+
+	TargetAvatarCharacter->OnEquipWeaponStateChangedDelegate.Broadcast(WeaponEquipState);
 }

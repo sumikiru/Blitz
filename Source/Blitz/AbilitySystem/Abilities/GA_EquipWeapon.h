@@ -25,10 +25,12 @@ class BLITZ_API UGA_EquipWeapon : public UBlitzGameplayAbility
 	GENERATED_BODY()
 
 public:
+	UGA_EquipWeapon();
+	
 	/** Actually activate ability, do not call this directly. We'll call it from ABlitzCharacter::ActivateAbilitiesWithTags(). */
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-
+	
 protected:
 	UFUNCTION(BlueprintCallable)
 	virtual void EquipWeapon();

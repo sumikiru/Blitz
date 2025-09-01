@@ -14,6 +14,10 @@ class UBlitzAttributeSet;
 class UBlitzAbilitySystemComponent;
 class UInputComponent;
 
+enum class EWeaponEquipState : uint8;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponChangedSignature, EWeaponEquipState, NewWeaponEquipState);
+
 /**
  * The base character pawn class used by this project.
  * Responsible for sending events to pawn components.
@@ -126,4 +130,8 @@ public:
 
 	template <class T>
 	const T* GetPawnData() const { return Cast<T>(DefaultPawnData); }
+
+	/** Delegates */
+	UPROPERTY(BlueprintAssignable)
+	FWeaponChangedSignature OnEquipWeaponStateChangedDelegate;
 };
