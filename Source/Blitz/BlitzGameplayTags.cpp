@@ -48,6 +48,10 @@ namespace BlitzGameplayTags
 	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_EquippingWeapon_Pistol, "Status.EquippingWeapon.Pistol");
 	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(Status_AbilityInputBlocked, "Status.AbilityInputBlocked");
 
+	// GameplayCues
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(GameplayCue_Weapon_Rifle_Fire, "GameplayCue.Weapon.Rifle.Fire");
+	BLITZ_API UE_DEFINE_GAMEPLAY_TAG(GameplayCue_Weapon_Pistol_Fire, "GameplayCue.Weapon.Pistol.Fire");
+
 	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString)
 	{
 		const UGameplayTagsManager& Manager = UGameplayTagsManager::Get();

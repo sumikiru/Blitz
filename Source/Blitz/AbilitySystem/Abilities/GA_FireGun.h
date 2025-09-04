@@ -22,12 +22,10 @@ public:
 	/** Actually activate ability, do not call this directly. We'll call it from ABlitzCharacter::ActivateAbilitiesWithTags(). */
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-	UFUNCTION()
-	void UpdateCurrentWeaponEquipState(EWeaponEquipState NewWeaponEquipState);
 	
 protected:
 	UFUNCTION(BlueprintCallable)
-	UAnimMontage* GetRelatedFireGunMontage();
+	UAnimMontage* GetRelatedFireGunMontage(const EWeaponEquipState& CurrentWeaponEquipState);
 	
 private:
 	// WaitInputPressTask->OnPress绑定的函数需要一个参数，同时还需要UFUNCTION()宏标记
@@ -37,12 +35,11 @@ private:
 	void FireGunAbilityCompleted();
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	TMap<EWeaponEquipState, TObjectPtr<UAnimMontage>> FireGunMontages;
+	TMap<EWeaponEquipState, TObjectPtr<UAnimMontage>> FireGunMontages;	// Character
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TMap<EWeaponEquipState, TObjectPtr<UAnimationAsset>> WeaponFireAnimations;	// Weapons
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TMap<EWeaponEquipState, float> FireDelayTimeSecs;	// 射击间隔
-	// 缓存当前Weapon，如果每次ActivateAbility时播放Montage都去获取ASC然后判断Tag，会造成大量开销。借助Delegate实现
-	UPROPERTY(VisibleAnywhere, Category = "Animation")
-	EWeaponEquipState CurrentWeaponEquipState = EWeaponEquipState::Pistol;
 
 	FTimerDynamicDelegate ShootDynamicTimerDelegate;
 

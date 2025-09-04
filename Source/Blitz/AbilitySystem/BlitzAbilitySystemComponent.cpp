@@ -4,6 +4,8 @@
 #include "BlitzAbilitySystemComponent.h"
 
 #include "Abilities/BlitzGameplayAbility.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayCueManager.h"
 #include "Blitz/BlitzGameplayTags.h"
 #include "Blitz/BlitzLogChannels.h"
 
@@ -59,8 +61,8 @@ void UBlitzAbilitySystemComponent::ProcessAbilityInput(float DeltaTime, bool bGa
 
 	// 注意static
 	static TArray<FGameplayAbilitySpecHandle> AbilitiesToActivate;
-	AbilitiesToActivate.Reset();	// 注意！
-	
+	AbilitiesToActivate.Reset(); // 注意！
+
 	// Process all abilities that activate when the input is held
 	for (const FGameplayAbilitySpecHandle& SpecHandle : InputHeldSpecHandles)
 	{
@@ -151,7 +153,7 @@ void UBlitzAbilitySystemComponent::ApplyGameplayEffects(const TArray<TSubclassOf
 	{
 		return;
 	}
-	
+
 	for (const TSubclassOf<UGameplayEffect>& GameplayEffectClass : Effects)
 	{
 		FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingSpec(GameplayEffectClass, 1.f, MakeEffectContext());
@@ -164,6 +166,42 @@ void UBlitzAbilitySystemComponent::ApplyGameplayEffects(const TArray<TSubclassOf
 			UE_LOG(LogBlitz, Error, TEXT("Failed to apply gameplay effect, please check if the effect is set in the pawn data"));
 		}
 	}
+}
+
+void UBlitzAbilitySystemComponent::ExecuteGameplayCueLocal(const FGameplayTag GameplayCueTag, const FGameplayCueParameters& GameplayCueParameters)
+{
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(
+		GetOwner(),
+		GameplayCueTag,
+		EGameplayCueEvent::Executed,
+		GameplayCueParameters
+	);
+}
+
+void UBlitzAbilitySystemComponent::AddGameplayCueLocal(const FGameplayTag GameplayCueTag, const FGameplayCueParameters& GameplayCueParameters)
+{
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(
+		GetOwner(),
+		GameplayCueTag,
+		EGameplayCueEvent::OnActive,
+		GameplayCueParameters
+	);
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(
+		GetOwner(),
+		GameplayCueTag,
+		EGameplayCueEvent::WhileActive,
+		GameplayCueParameters
+	);
+}
+
+void UBlitzAbilitySystemComponent::RemoveGameplayCueLocal(const FGameplayTag GameplayCueTag, const FGameplayCueParameters& GameplayCueParameters)
+{
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(
+		GetOwner(),
+		GameplayCueTag,
+		EGameplayCueEvent::Removed,
+		GameplayCueParameters
+	);
 }
 
 void UBlitzAbilitySystemComponent::AbilitySpecInputPressed(FGameplayAbilitySpec& Spec)

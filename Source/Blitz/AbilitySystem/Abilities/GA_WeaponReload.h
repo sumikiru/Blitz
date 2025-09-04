@@ -23,9 +23,11 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable)
-	UAnimMontage* GetRelatedWeaponReloadMontage();
+	UAnimMontage* GetRelatedWeaponReloadMontage(const EWeaponEquipState& CurrentWeaponEquipState);
 	
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	TMap<EWeaponEquipState, TObjectPtr<UAnimMontage>> WeaponReloadMontages;
+	TMap<EWeaponEquipState, TObjectPtr<UAnimMontage>> CharacterReloadMontages;	// Character
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TMap<EWeaponEquipState, TObjectPtr<UAnimationAsset>> WeaponAnimations;	// Weapons
 };

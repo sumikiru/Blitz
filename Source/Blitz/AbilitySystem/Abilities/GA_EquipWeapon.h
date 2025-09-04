@@ -4,17 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "BlitzGameplayAbility.h"
+#include "Blitz/Character/BlitzCharacter.h"
 #include "GA_EquipWeapon.generated.h"
 
 class ABlitzCharacter;
-
-UENUM(BlueprintType)
-enum class EWeaponEquipState : uint8
-{
-	Unarmed,
-	Pistol,
-	Rifle
-};
 
 /**
  * 进入对局时自动激活，以及切换武器时

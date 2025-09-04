@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "GA_EquipWeapon.h"
 #include "Abilities//Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Blitz/BlitzLogChannels.h"
 #include "Blitz/Character/BlitzCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -35,18 +36,33 @@ void UGA_FireGun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		}
 
 		// 不能在构造函数中调用，无法获取GetActorInfo()
-		// 也可以直接获取ABlitzCharacter的WeaponState，这里仅提供其他写法
-		if (ABlitzCharacter* TargetAvatarCharacter = Cast<ABlitzCharacter>(GetActorInfo().AvatarActor))
+		ABlitzCharacter* TargetAvatarCharacter = Cast<ABlitzCharacter>(GetActorInfo().AvatarActor);
+		if (!TargetAvatarCharacter)
 		{
-			TargetAvatarCharacter->OnEquipWeaponStateChangedDelegate.AddUniqueDynamic(this, &ThisClass::UpdateCurrentWeaponEquipState);
+			UE_LOG(LogBlitzAbilitySystem, Error, TEXT("Invalid Target Avatar Character!"));
+			K2_EndAbility();
+			return;	// 别忘了return;
 		}
+		
+		const EWeaponEquipState& TargetAvatarWeaponState = TargetAvatarCharacter->CurrentEquipWeaponState;
+		if (TargetAvatarWeaponState == EWeaponEquipState::Unarmed)
+		{
+			UE_LOG(LogBlitzAbilitySystem, Error, TEXT("Cannot find related weapon reload montage!"));
+			K2_EndAbility();
+			return;
+		}
+
+		// 每次固定产生的特效/音效放在AnimMontage/Animation中伴随其同步。如果是击中到敌人身上这种动态效果，使用GameplayCue，借助GE
+		// todo: 将其封装为AbilityTask，完善预测功能
+		TargetAvatarCharacter->PlayWeaponAnimation(WeaponFireAnimations[TargetAvatarWeaponState]);
 
 		// 仅仅这样写还不能播放Montage，需要让它知道应该在AnimBP的哪个位置播放
 		// 详见插槽DefaultSlot/FullBodyAdditivePreAim，需要在AM和AnimBP指定插槽
+		// Montage默认在Avatar上播放，武器的需要单独设置。详见前面的PlayWeaponMontage()
 		UAbilityTask_PlayMontageAndWait* PlayFireGunMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
 			this,
 			FName("FireGun"),
-			GetRelatedFireGunMontage()
+			GetRelatedFireGunMontage(TargetAvatarWeaponState)
 		);
 		//PlayFireGunMontageTask->OnBlendOut.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlayFireGunMontageTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
@@ -62,7 +78,7 @@ void UGA_FireGun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 		// Set a timer to execute delegate. Setting an existing timer will reset that timer with updated parameters.
 		UKismetSystemLibrary::K2_SetTimerDelegate(
 			ShootDynamicTimerDelegate,
-			FireDelayTimeSecs[CurrentWeaponEquipState],
+			FireDelayTimeSecs[TargetAvatarWeaponState],
 			true
 		);
 	}
@@ -92,7 +108,7 @@ void UGA_FireGun::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	return EWeaponEquipState::Unarmed;
 }*/
 
-UAnimMontage* UGA_FireGun::GetRelatedFireGunMontage()
+UAnimMontage* UGA_FireGun::GetRelatedFireGunMontage(const EWeaponEquipState& CurrentWeaponEquipState)
 {
 	if (CurrentWeaponEquipState != EWeaponEquipState::Unarmed)
 	{
@@ -116,9 +132,4 @@ void UGA_FireGun::FireGunAbilityCompleted()
 	BulletCounts++;
 
 	UE_LOG(LogTemp, Display, TEXT("FireGun Ended: %d"), BulletCounts);
-}
-
-void UGA_FireGun::UpdateCurrentWeaponEquipState(EWeaponEquipState NewWeaponEquipState)
-{
-	CurrentWeaponEquipState = NewWeaponEquipState;
 }

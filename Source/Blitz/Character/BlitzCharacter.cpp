@@ -49,6 +49,8 @@ void ABlitzCharacter::BeginPlay()
 		FAttachmentTransformRules::SnapToTargetIncludingScale,
 		FName("WeaponEquipped")
 	);
+
+	OnEquipWeaponStateChangedDelegate.AddUniqueDynamic(this, &ThisClass::UpdateCurrentEquipWeaponState);
 }
 
 void ABlitzCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -65,6 +67,7 @@ void ABlitzCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DefaultPawnData, SharedParams);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, HeadStatGaugeVisibilityCheckUpdateGap, SharedParams);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, HeadStatGaugeVisibilityRangeSquared, SharedParams);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, CurrentEquipWeaponState, SharedParams);
 }
 
 UAbilitySystemComponent* ABlitzCharacter::GetAbilitySystemComponent() const
@@ -233,11 +236,14 @@ void ABlitzCharacter::ConfigureOverheadStatsWidget() const
 
 void ABlitzCharacter::LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer)
 {
-	// 由Server端触发
-	if (HasAuthority())
-	{
-		NetMulticast_LinkNewAnimClassLayers(InClass, bLinkAnimLayer);
-	}
+	// 从服务器调用
+	Server_LinkNewAnimClassLayers(InClass, bLinkAnimLayer);
+}
+
+void ABlitzCharacter::Server_LinkNewAnimClassLayers_Implementation(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer)
+{
+	// 不需要再加上if(HasAuthority())判断
+	NetMulticast_LinkNewAnimClassLayers(InClass, bLinkAnimLayer);
 }
 
 bool ABlitzCharacter::NetMulticast_LinkNewAnimClassLayers_Validate(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer)
@@ -255,6 +261,71 @@ void ABlitzCharacter::NetMulticast_LinkNewAnimClassLayers_Implementation(TSubcla
 	{
 		GetMesh()->UnlinkAnimClassLayers(InClass);
 	}
+}
+
+void ABlitzCharacter::PlayWeaponAnimation(UAnimationAsset* AnimToPlay)
+{
+	// 本地直接播放
+	Local_PlayWeaponAnimation(AnimToPlay);
+	
+	// 从服务器调用
+	Server_PlayWeaponAnimation(AnimToPlay);
+}
+
+void ABlitzCharacter::Local_PlayWeaponAnimation(UAnimationAsset* AnimToPlay) const
+{
+	USkeletalMeshComponent* CurrentWeaponMesh = nullptr;
+	switch (CurrentEquipWeaponState)
+	{
+	case EWeaponEquipState::Rifle:
+		CurrentWeaponMesh = GetRifleMeshComponent();
+		break;
+	case EWeaponEquipState::Pistol:
+		CurrentWeaponMesh = GetPistolMeshComponent();
+		break;
+	case EWeaponEquipState::Unarmed:
+		CurrentWeaponMesh = nullptr;
+		break;
+	}
+	if (!CurrentWeaponMesh)
+	{
+		return;
+	}
+
+	CurrentWeaponMesh->PlayAnimation(AnimToPlay, false);
+}
+
+void ABlitzCharacter::Server_PlayWeaponAnimation_Implementation(UAnimationAsset* AnimToPlay)
+{
+	// 不需要再加上if(HasAuthority())判断
+	NetMulticast_PlayWeaponAnimation(AnimToPlay);
+}
+
+void ABlitzCharacter::NetMulticast_PlayWeaponAnimation_Implementation(UAnimationAsset* AnimToPlay)
+{
+	// 多播函数则忽略本地客户端，避免多次播放
+	if (IsLocallyControlled())
+	{
+		return;
+	}
+
+	Local_PlayWeaponAnimation(AnimToPlay);
+}
+
+bool ABlitzCharacter::NetMulticast_PlayWeaponAnimation_Validate(UAnimationAsset* AnimToPlay)
+{
+	return CurrentEquipWeaponState != EWeaponEquipState::Unarmed && AnimToPlay != nullptr;
+}
+
+void ABlitzCharacter::OnRep_CurrentEquipWeaponState()
+{
+	UE_LOG(LogBlitz, Log, TEXT("Current Equip Weapon State has been synced"));
+}
+
+void ABlitzCharacter::UpdateCurrentEquipWeaponState(EWeaponEquipState NewWeaponEquipState)
+{
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, CurrentEquipWeaponState, this);
+	CurrentEquipWeaponState = NewWeaponEquipState;
 }
 
 void ABlitzCharacter::UpdateOverheadStatsGaugeVisibility() const

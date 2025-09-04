@@ -14,7 +14,13 @@ class UBlitzAttributeSet;
 class UBlitzAbilitySystemComponent;
 class UInputComponent;
 
-enum class EWeaponEquipState : uint8;
+UENUM(BlueprintType)
+enum class EWeaponEquipState : uint8
+{
+	Unarmed,
+	Pistol,
+	Rifle
+};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponChangedSignature, EWeaponEquipState, NewWeaponEquipState);
 
@@ -99,12 +105,39 @@ protected:
 	
 	/**================================ Animation =========================================== */
 public:
+	// 该写法不存在预测，所有端均在同一时刻LinkAnimClassLayer。如果存在延迟，本地也会在延迟后Link，从而确保强一致性
+	// 而如果是GA_FireGun中这种AbilityTask，存在预测机制，客户端会预测性地播放Montage，这就和其他端不是同一时刻播放的
+	// 如果Validate函数返回false,则预测错误，执行回滚操作（如立即停止正常播放的动画）
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	void LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
+	UFUNCTION(Server, Reliable)
+	void Server_LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
 	UFUNCTION(NetMulticast, Reliable, WithValidation)
 	void NetMulticast_LinkNewAnimClassLayers(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
 	bool NetMulticast_LinkNewAnimClassLayers_Validate(TSubclassOf<UAnimInstance> InClass, bool bLinkAnimLayer = true);
 
+	// 由于PlayMontage需要GetAnimInstance()，因此需要为BP中的各个Mesh分配动画蓝图为AnimInstance（至少不为空）
+	// PlayAnimation则不需要管这些，且仅使用PlayAnimation武器的弹匣动画会正常播放，原因未知
+	// 客户端预测要使用RPC而不是RepNotify
+	UFUNCTION(BlueprintCallable, Category = "Animation|Weapon")
+	void PlayWeaponAnimation(UAnimationAsset* AnimToPlay);
+	// 本地预测：直接播放，Validate验证。多播函数则忽略本地客户端，避免多次播放
+	// 可以通过Niagara系统确定是否同步了。如果只能听到一个声音但各端都播放了特效，说明同步了，只有一个声音是因为系统只能播放当前控制端的音频
+	void Local_PlayWeaponAnimation(UAnimationAsset* AnimToPlay) const;
+	UFUNCTION(Server, Unreliable)
+	void Server_PlayWeaponAnimation(UAnimationAsset* AnimToPlay);
+	UFUNCTION(NetMulticast, Unreliable, WithValidation)
+	void NetMulticast_PlayWeaponAnimation(UAnimationAsset* AnimToPlay);
+	bool NetMulticast_PlayWeaponAnimation_Validate(UAnimationAsset* AnimToPlay);
+
+	// 缓存当前Weapon，如果每次ActivateAbility时播放Montage都去获取ASC然后判断Tag，会造成大量开销。借助Delegate实现
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_CurrentEquipWeaponState, Category = "Animation")
+	EWeaponEquipState CurrentEquipWeaponState = EWeaponEquipState::Pistol;
+	UFUNCTION()
+	void OnRep_CurrentEquipWeaponState();
+	UFUNCTION(BlueprintCallable, Category = "Animation|Weapon")
+	void UpdateCurrentEquipWeaponState(EWeaponEquipState NewWeaponEquipState);
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TSubclassOf<UAnimInstance> UnarmedLayer;
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")

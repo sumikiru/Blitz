@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "BlitzGameplayAbility.generated.h"
 
+enum class EWeaponEquipState : uint8;
+
 /**
  *	Defines how an ability is meant to activate.
  */
@@ -32,6 +34,9 @@ class BLITZ_API UBlitzGameplayAbility : public UGameplayAbility
 
 public:
 	UBlitzGameplayAbility();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	EWeaponEquipState GetAvatarActorCurrentWeaponState() const;
 
 protected:
 	UFUNCTION(BlueprintCallable, Category = "Animation")
