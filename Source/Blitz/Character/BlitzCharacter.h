@@ -8,6 +8,8 @@
 #include "DataAssets/BlitzPawnData.h"
 #include "BlitzCharacter.generated.h"
 
+class ULagCompensationComponent;
+class UBoxComponent;
 class UWidgetComponent;
 class UBlitzPawnData;
 class UBlitzAttributeSet;
@@ -54,6 +56,8 @@ public:
 	// 判断该Character是不是AI控制的（不论Server/Client）
 	bool IsControlledByAI() const;
 
+	virtual void PostInitializeComponents() override;
+
 protected:
 	/**
 	 * 1. 对于AI控制的角色，ASC存在于Pawn中，通常在Pawn的BeginPlay()方法中完成ASC在服务器端和客户端的初始化 \n
@@ -73,7 +77,7 @@ protected:
 	TObjectPtr<UBlitzAbilitySystemComponent> BlitzAbilitySystemComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem")
 	TObjectPtr<UBlitzAttributeSet> BlitzAttributeSet;
-
+	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USkeletalMeshComponent> PistolMeshComponent;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
@@ -82,6 +86,60 @@ protected:
 	FName PistolUnequippedSocket = FName("PistolUnequipped");
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName RifleUnequippedSocket = FName("RifleUnequipped");
+
+#pragma region HitBoxes
+	/**
+	 * Hit Boxes used for server-side rewind
+	 * 与胶囊体/直接记录各个骨骼网格不同，它采取了一种折中的方案，比前者的信息更详细（如手臂、头部位置），比后者的开销更小
+	 * 子弹命中时也会根据不同部分的HitBox造成不同的伤害
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Head;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Pelvis;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Spine_02;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Spine_03;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Spine_04;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Spine_05;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Upperarm_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Upperarm_r;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Lowerarm_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Lowerarm_r;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Hand_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Hand_r;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Thigh_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Thigh_r;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Calf_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Calf_r;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Foot_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Foot_r;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Ball_l;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<UBoxComponent> Ball_r;
+
+	// Attach them to corresponding bones
+	void InitHitBoxes();
+#pragma endregion
+	// 延迟补偿组件
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "LagComposation")
+	TObjectPtr<ULagCompensationComponent> LagCompensationComponent;
 
 	UFUNCTION()
 	void OnRep_PawnData();
@@ -167,4 +225,8 @@ public:
 	/** Delegates */
 	UPROPERTY(BlueprintAssignable)
 	FWeaponChangedSignature OnEquipWeaponStateChangedDelegate;
+
+	/** Hit Boxes */
+	UPROPERTY()
+	TMap<FName, TObjectPtr<UBoxComponent>> HitCollisionBoxes;
 };

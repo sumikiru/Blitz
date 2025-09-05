@@ -8,3 +8,7 @@
 void UBlitzViewModelBase::BindAttributes_Implementation(UBlitzAbilitySystemComponent* InASC)
 {
 }
+
+void UBlitzViewModelBase::BindPlayerController_Implementation(ABlitzPlayerController* InPlayerController)
+{
+}

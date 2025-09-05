@@ -7,6 +7,7 @@
 #include "Blitz/UI/View/SettingViewModelInterface.h"
 #include "BlitzCommonActivatableWidget.generated.h"
 
+class ABlitzPlayerController;
 class UBlitzAbilitySystemComponent;
 
 UENUM(BlueprintType)
@@ -41,7 +42,7 @@ protected:
 	 * 之所以使用BP_BindAttributesToViewModels()，是因为要对其View Binding对应的ViewModel进行BindAttributes();
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
-	virtual void BindAttributesToViewModels_Implementation(UAbilitySystemComponent* InASC) override;
+	virtual void BindAttributesToViewModels_Implementation(APlayerController* InPlayerController) override;
 	
 	/**
 	 * 参考自https://stackoverflow.com/questions/66605075/ue4-userwidget-button-bind-with-spawning-actor-in-playercontroller \n
@@ -49,8 +50,9 @@ protected:
 	 * @note 应根据WBP_Root中Push Widget得到的UCommonActivatableWidget，之后才SetOwnerAbilitySystemComponent+BindAttributesToViewModels，
 	 * 不能在NativeConstruct()/NativeInitialized()等等中实现，此时会提示无效的InASC，因为这些函数发生在Push Model期间，导致BindAttributesToViewModels过早执行
 	 */	
-	virtual void SetOwnerAbilitySystemComponent(UAbilitySystemComponent* InASC);
+	virtual void SetOwnerInformation(APlayerController* InController);
 
+	TObjectPtr<ABlitzPlayerController> OwnerPlayerController;
 	TObjectPtr<UBlitzAbilitySystemComponent> OwnerAbilitySystemComponent;
 
 	/** The desired input mode to use while this UI is activated, for example do you want key presses to still reach the game/player controller? */

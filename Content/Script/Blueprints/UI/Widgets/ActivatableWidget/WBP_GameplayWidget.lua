@@ -31,4 +31,12 @@ function M:BP_BindAttributesToViewModels(OwnerASC)
 	end
 end
 
+function M:BP_BindPlayerControllerToViewModels(OwnerController)
+	if UE.UKismetSystemLibrary.DoesImplementInterface(self.VM_MatchState, UE.UViewModelBindingInterface) then
+		self.VM_MatchState:BindPlayerController_Implementation(OwnerController);
+	else
+		error("VM_MatchState does not implement UViewModelBindingInterface");
+	end
+end
+
 return M

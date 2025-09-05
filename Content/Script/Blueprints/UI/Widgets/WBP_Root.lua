@@ -33,7 +33,10 @@ function M:BP_PushTargetWidgetAndBindAttributes(InWidgetStack, TargetActivatable
 		CommonActivatableWidgetObject:BindAttributesToViewModels_Implementation(
 			-- 暂时为0，获取本地玩家
 			-- 注意是self不是this!如果看到A null object was passed as a world context object to UEngine::GetWorldFromContextObject().说明写成this了
-			UE.UAbilitySystemBlueprintLibrary.GetAbilitySystemComponent(UE.UGameplayStatics.GetPlayerState(self, 0))
+			-- UE.UAbilitySystemBlueprintLibrary.GetAbilitySystemComponent(UE.UGameplayStatics.GetPlayerController(self, 0))
+			-- ASC在PlayerState上，可以通过PlayerState获取，无法直接通过PlayerController获取，但可以根据PlayerController获取PlayerState
+			--UE.UAbilitySystemBlueprintLibrary.GetAbilitySystemComponent(UE.UGameplayStatics.GetPlayerState(self, 0))
+			UE.UGameplayStatics.GetPlayerController(self, 0)
 		);
 	else	-- == nil
 		error("Cast failed, please check cast target.");

@@ -6,6 +6,7 @@
 #include "BlitzCommonActivatableWidget.h"
 #include "GameplayWidget.generated.h"
 
+class UMatchStateGauge;
 class UAbilitySystemComponent;
 class UBlitzAbilitySystemComponent;
 class UCommonTextBlock;
@@ -23,9 +24,11 @@ class BLITZ_API UGameplayWidget : public UBlitzCommonActivatableWidget
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI|ViewModel")
 	void BP_BindAttributesToViewModels(UBlitzAbilitySystemComponent* OwnerASC); // 不需要在蓝图中调用，所以不需要BlueprintCallable
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI|ViewModel")
+	void BP_BindPlayerControllerToViewModels(ABlitzPlayerController* OwnerController); 
 	
 	// 父类已经有了，子类不应该再写UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
-	virtual void BindAttributesToViewModels_Implementation(UAbilitySystemComponent* InASC) override;
+	virtual void BindAttributesToViewModels_Implementation(APlayerController* InPlayerController) override;
 
 private:
 	// 需要为BlueprintReadWrite，才能在蓝图中进行视图绑定(View Binding)，否则会提示无法进行属性存取/找不到对应Widget
@@ -38,4 +41,7 @@ private:
 	TObjectPtr<UValueGauge> ArmorBar;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess))
 	TObjectPtr<UValueGauge> HealthBar;
+	
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess))
+	TObjectPtr<UMatchStateGauge> MatchStateGauge;
 };

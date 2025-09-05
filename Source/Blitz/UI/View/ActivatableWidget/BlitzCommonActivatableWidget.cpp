@@ -4,7 +4,7 @@
 #include "BlitzCommonActivatableWidget.h"
 
 #include "Blitz/BlitzLogChannels.h"
-#include "Blitz/AbilitySystem/BlitzAbilitySystemComponent.h"
+#include "Blitz/Player/BlitzPlayerController.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BlitzCommonActivatableWidget)
 
@@ -24,18 +24,22 @@ TOptional<FUIInputConfig> UBlitzCommonActivatableWidget::GetDesiredInputConfig()
 	}
 }
 
-void UBlitzCommonActivatableWidget::BindAttributesToViewModels_Implementation(UAbilitySystemComponent* InASC)
+void UBlitzCommonActivatableWidget::BindAttributesToViewModels_Implementation(APlayerController* InPlayerController)
 {
 }
 
-void UBlitzCommonActivatableWidget::SetOwnerAbilitySystemComponent(UAbilitySystemComponent* InASC)
+void UBlitzCommonActivatableWidget::SetOwnerInformation(APlayerController* InController)
 {
-	if (!InASC)
+	if (!InController)
 	{
 		UE_LOG(LogBlitz, Error,
-		       TEXT("InASC in [%s]::SetOwnerAbilitySystemComponent() is not valid, please check if its parent can get valid local player state."),
+		       TEXT("InController in [%s]::SetOwnerAbilitySystemComponent() is not valid, please check if its parent can get valid local player controller."),
 		       *GetNameSafe(this));
 		return;
 	}
-	OwnerAbilitySystemComponent = Cast<UBlitzAbilitySystemComponent>(InASC);
+	OwnerPlayerController = Cast<ABlitzPlayerController>(InController);
+
+	// ASC在PlayerState上，可以通过PlayerState获取，无法直接通过PlayerController获取，但可以根据PlayerController获取PlayerState
+	// 详见ABlitzPlayerController::GetBlitzAbilitySystemComponent()
+	OwnerAbilitySystemComponent = OwnerPlayerController->GetBlitzAbilitySystemComponent();
 }

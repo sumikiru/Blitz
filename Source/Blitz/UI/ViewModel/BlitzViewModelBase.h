@@ -52,4 +52,7 @@ public:
 	// UFUNCTION直接写父类中。父类已经有了，子类不应该再写UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
 	UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
 	virtual void BindAttributes_Implementation(UBlitzAbilitySystemComponent* InASC) override;
+	// 需要绑定PlayerController里的属性时用，如MatchTime
+	UFUNCTION(BlueprintCallable, Category = "UI|ViewModel")
+	virtual void BindPlayerController_Implementation(ABlitzPlayerController* InPlayerController) override;
 };

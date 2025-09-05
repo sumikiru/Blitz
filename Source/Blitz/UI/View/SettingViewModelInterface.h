@@ -24,5 +24,5 @@ class BLITZ_API ISettingViewModelInterface
 public:
 	// virtual void BindAttributesToViewModels() = 0;
 	UFUNCTION(BlueprintNativeEvent)
-	void BindAttributesToViewModels(UAbilitySystemComponent* InASC);
+	void BindAttributesToViewModels(APlayerController* InPlayerController);
 };

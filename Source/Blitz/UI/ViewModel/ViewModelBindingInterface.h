@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "ViewModelBindingInterface.generated.h"
 
+class ABlitzPlayerController;
 class UBlitzAbilitySystemComponent;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -26,4 +27,6 @@ public:
 	// virtual void BindAttributes(UBlitzAbilitySystemComponent* InASC) = 0;
 	UFUNCTION(BlueprintNativeEvent)
 	void BindAttributes(UBlitzAbilitySystemComponent* InASC);
+	UFUNCTION(BlueprintNativeEvent)
+	void BindPlayerController(ABlitzPlayerController* InPlayerController);
 };
